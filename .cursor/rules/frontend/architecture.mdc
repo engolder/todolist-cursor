@@ -32,48 +32,101 @@ alwaysApply: false
 
 ```
 src/
-├── features/          # 기능별 모듈화
-│   ├── auth/         # 인증 관련 기능
-│   │   ├── components/  # 인증 관련 컴포넌트
-│   │   ├── hooks/      # 인증 관련 훅
-│   │   ├── api/        # 인증 관련 API
-│   │   ├── store/      # 인증 관련 상태 관리
-│   │   ├── types/      # 인증 관련 타입
-│   │   ├── utils/      # 인증 관련 유틸리티
-│   │   └── index.ts    # 기능 진입점
-│   ├── todos/        # Todo 관련 기능
-│   │   ├── components/  # Todo 관련 컴포넌트
-│   │   ├── hooks/      # Todo 관련 훅
-│   │   ├── api/        # Todo 관련 API
-│   │   ├── store/      # Todo 관련 상태 관리
-│   │   ├── types/      # Todo 관련 타입
-│   │   ├── utils/      # Todo 관련 유틸리티
-│   │   └── index.ts    # 기능 진입점
-│   └── users/        # 사용자 관련 기능
-│       ├── components/  # 사용자 관련 컴포넌트
-│       ├── hooks/      # 사용자 관련 훅
-│       ├── api/        # 사용자 관련 API
-│       ├── store/      # 사용자 관련 상태 관리
-│       ├── types/      # 사용자 관련 타입
-│       ├── utils/      # 사용자 관련 유틸리티
-│       └── index.ts    # 기능 진입점
-├── shared/           # 공유 리소스
-│   ├── components/   # 공통 컴포넌트 (Button, Input, Modal 등)
-│   │   ├── Button/
-│   │   │   ├── Button.tsx
-│   │   │   ├── Button.test.tsx
-│   │   │   └── index.ts
-│   │   └── index.ts
-│   ├── hooks/       # 공통 훅 (useLocalStorage, useDebounce 등)
-│   ├── utils/       # 공통 유틸리티 (날짜, 검증 등)
-│   └── types/       # 공통 타입 정의
-├── app/             # 앱 코어
-│   ├── providers/   # 앱 전역 프로바이더
-│   ├── routes/      # 라우트 설정
-│   └── store/       # 전역 상태 설정
-└── assets/          # 정적 자산
-    ├── images/
-    └── icons/
+├── app/             # 앱 초기화, 프로바이더, 라우팅
+│   ├── styles/      # 전역 스타일
+│   ├── providers/   # 앱 프로바이더
+│   └── index.ts     # 앱 진입점
+├── pages/           # 페이지 컴포넌트
+│   ├── home/        # 홈 페이지
+│   │   ├── ui/      # 페이지 UI 컴포넌트
+│   │   └── index.ts # 페이지 진입점
+│   └── index.ts     # 페이지 모음
+├── widgets/         # 독립적인 큰 블록
+│   ├── todo/        # Todo 위젯
+│   │   ├── ui/      # 위젯 UI 컴포넌트
+│   │   ├── lib/     # 위젯 로직
+│   │   └── index.ts # 위젯 진입점
+│   └── index.ts     # 위젯 모음
+├── features/        # 기능 단위 모듈
+│   ├── todo-list/   # Todo 리스트 기능
+│   │   ├── ui/      # 기능 UI 컴포넌트
+│   │   ├── model/   # 기능 상태 관리
+│   │   ├── lib/     # 기능 로직
+│   │   └── index.ts # 기능 진입점
+│   └── index.ts     # 기능 모음
+├── entities/        # 비즈니스 엔티티
+│   ├── todo/        # Todo 엔티티
+│   │   ├── ui/      # 엔티티 UI 컴포넌트
+│   │   ├── model/   # 엔티티 모델
+│   │   ├── lib/     # 엔티티 로직
+│   │   └── index.ts # 엔티티 진입점
+│   └── index.ts     # 엔티티 모음
+└── shared/          # 공유 리소스
+    ├── ui/          # UI 키트
+    ├── api/         # API 클라이언트
+    ├── lib/         # 유틸리티
+    ├── config/      # 설정
+    └── index.ts     # 공유 리소스 진입점
+```
+
+### 레이어별 책임
+
+1. **app/** - 앱 초기화
+   - 전역 프로바이더
+   - 라우팅 설정
+   - 전역 스타일
+   - 앱 설정
+
+2. **pages/** - 페이지 컴포넌트
+   - 라우트에 매핑되는 페이지
+   - 위젯과 피처를 조합하여 페이지 구성
+   - 페이지별 레이아웃
+
+3. **widgets/** - 독립적인 큰 블록
+   - 재사용 가능한 큰 단위의 UI 블록
+   - 여러 엔티티와 피처를 조합
+   - 독립적으로 동작 가능
+
+4. **features/** - 기능 단위 모듈
+   - 사용자 시나리오 구현
+   - 비즈니스 로직 캡슐화
+   - UI와 상태 관리 포함
+
+5. **entities/** - 비즈니스 엔티티
+   - 도메인 모델 정의
+   - 엔티티 관련 로직
+   - 재사용 가능한 UI 컴포넌트
+
+6. **shared/** - 공유 리소스
+   - UI 키트
+   - 유틸리티 함수
+   - API 클라이언트
+   - 타입 정의
+   - 상수
+
+### 레이어 의존성 규칙
+
+1. 상위 레이어는 하위 레이어에만 의존 가능
+   - pages → widgets → features → entities → shared
+   - app은 모든 레이어 사용 가능
+
+2. 같은 레이어 내에서는 직접 의존성 금지
+   - features끼리는 직접 import 금지
+   - entities끼리는 직접 import 금지
+
+3. shared는 다른 레이어에 의존성을 가질 수 없음
+
+### 슬라이스 구조
+
+각 슬라이스(기능 단위)는 다음 구조를 따름:
+
+```
+slice/
+├── ui/          # UI 컴포넌트
+├── model/       # 상태 관리 (store, actions, selectors)
+├── lib/         # 유틸리티, 헬퍼
+├── api/         # API 관련 로직
+└── index.ts     # Public API
 ```
 
 ## 코딩 컨벤션
