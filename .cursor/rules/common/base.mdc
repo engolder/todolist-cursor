@@ -1,3 +1,8 @@
+---
+description: 에이전트의 작업 처리 프로세스를 정의합니다
+globs: ["**/*"]
+alwaysApply: true
+---
 
 # 에이전트 작업 처리 프로세스
 
