@@ -1,17 +1,15 @@
 import { create } from 'zustand'
-import type { Todo, CreateTodoInput } from '../types/todo'
+import type { Todo, CreateTodoInput } from "../../entities/todo/todo";
 
 interface TodoStore {
-  todos: Todo[]
-  isLoading: boolean
-  addTodo: (input: CreateTodoInput) => void
-  toggleTodo: (id: string) => void
-  deleteTodo: (id: string) => void
+  todos: Todo[];
+  addTodo: (input: CreateTodoInput) => void;
+  toggleTodo: (id: string) => void;
+  deleteTodo: (id: string) => void;
 }
 
 export const useTodoStore = create<TodoStore>((set) => ({
   todos: [],
-  isLoading: false,
   addTodo: (input) =>
     set((state) => ({
       todos: [
@@ -34,4 +32,4 @@ export const useTodoStore = create<TodoStore>((set) => ({
     set((state) => ({
       todos: state.todos.filter((todo) => todo.id !== id),
     })),
-})) 
+})); 
