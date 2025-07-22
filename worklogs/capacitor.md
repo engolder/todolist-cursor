@@ -145,7 +145,7 @@
           "scripts": {
             "ios:build": "yarn build && npx cap sync ios",  // 웹앱 빌드 후 iOS 프로젝트 동기화
             "ios:open": "npx cap open ios",                 // Xcode에서 iOS 프로젝트 열기
-            "ios:dev": "yarn build && npx cap run ios --scheme App",     // 개발 모드로 iOS 시뮬레이터에서 실행
+            "ios:dev": "yarn ios:serve & npx cap run ios --scheme App",     // 개발 모드로 iOS 시뮬레이터에서 실행
             "ios:serve": "vite build --mode development --watch" // 개발 중 실시간 리로드
           }
         }
@@ -175,7 +175,7 @@
         - 해결 방안:
           1. package.json 스크립트 수정
              ```json
-             "ios:dev": "yarn build && npx cap run ios --scheme App"
+             "ios:dev": "yarn ios:serve & npx cap run ios --scheme App"
              ```
           2. `--scheme App` 옵션으로 정확한 scheme 이름을 명시
           3. 결과: 빌드 및 시뮬레이터 실행 성공
@@ -248,3 +248,30 @@
    - 푸시 알림 지원 검토
    - 생체 인증 통합 검토
    - 디바이스 API 활용 검토
+
+### 1.5 스크립트 개선 작업 (2024-03-27)
+
+#### 변경사항
+1. `ios:dev` 스크립트 병렬 실행 방식으로 변경
+   ```json
+   // 기존
+   "ios:dev": "yarn build && npx cap run ios --scheme App"
+   
+   // 변경
+   "ios:dev": "yarn ios:serve & npx cap run ios --scheme App"
+   ```
+
+#### 개선 효과
+1. 개발 효율성 향상
+   - 개발 서버와 시뮬레이터 동시 실행
+   - 파일 변경 시 자동 리빌드 및 리로드
+   - 빌드 시간 단축
+
+#### 주의사항
+1. 백그라운드 프로세스 관리
+   - 개발 서버가 백그라운드에서 실행되므로 종료 시 주의 필요
+   - 프로세스 정리를 위한 명시적인 종료 필요
+
+2. 메모리 사용량
+   - 개발 서버가 메모리에서 동작하므로 리소스 모니터링 필요
+   - 장시간 개발 시 메모리 누수 가능성 고려

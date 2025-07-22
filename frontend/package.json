@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "ios:build": "yarn build && npx cap sync ios",
     "ios:open": "npx cap open ios",
-    "ios:dev": "yarn build && npx cap run ios --scheme App",
+    "ios:dev": "yarn ios:serve & npx cap run ios --scheme App",
     "ios:serve": "vite build --mode development --watch"
   },
   "dependencies": {
