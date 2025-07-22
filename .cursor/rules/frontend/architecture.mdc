@@ -725,11 +725,28 @@ REACT_APP_ENV=development
   "scripts": {
     "ios:build": "yarn build && npx cap sync ios",  // 웹앱 빌드 후 iOS 프로젝트 동기화
     "ios:open": "npx cap open ios",                 // Xcode에서 프로젝트 열기
-    "ios:dev": "yarn build && npx cap run ios --scheme App",  // 시뮬레이터에서 실행
+    "ios:dev": "yarn ios:serve & npx cap run ios --scheme App",  // 개발 서버와 시뮬레이터 병렬 실행
     "ios:serve": "vite build --mode development --watch"  // 개발 중 실시간 리로드
   }
 }
 ```
+
+### 개발 스크립트 실행 방식
+1. `ios:dev` 스크립트
+   - 개발 서버(`ios:serve`)와 iOS 시뮬레이터를 병렬로 실행
+   - 백그라운드에서 개발 서버가 실행되며 파일 변경 감지
+   - 시뮬레이터에서 실시간으로 변경사항 확인 가능
+   - 종료 시 백그라운드 프로세스도 함께 종료됨
+
+2. `ios:serve` 스크립트
+   - 개발 모드로 빌드하며 파일 변경 감지
+   - `--watch` 옵션으로 실시간 리빌드
+   - 메모리에서 변경사항 즉시 반영
+
+3. 실행 순서
+   - 개발 서버가 백그라운드에서 시작
+   - iOS 시뮬레이터가 실행되며 앱 로드
+   - 코드 수정 시 자동으로 리빌드 및 리로드
 
 ### Capacitor 설정
 ```typescript
