@@ -1,6 +1,6 @@
 import { type FC } from 'react'
 import * as Checkbox from '@radix-ui/react-checkbox'
-import type { Todo } from '../types/todo'
+import type { Todo } from "../../entities/todo/todo";
 import * as styles from './styles.css'
 
 interface TodoItemProps {
