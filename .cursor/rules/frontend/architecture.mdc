@@ -22,6 +22,15 @@ alwaysApply: false
 - **빌드 도구**: Vite (빠른 개발 환경)
 - **패키지 매니저**: Yarn (안정적이고 빠른 의존성 관리)
 
+### iOS 앱 래핑
+- **프레임워크**: Capacitor 7.4.2
+- **개발 환경**:
+  - Xcode 15.0+
+  - CocoaPods
+  - Ruby 3.4.5+
+- **지원 버전**: iOS 14.0 이상
+- **빌드 도구**: Xcode Build System
+
 ### 개발 도구
 - **코드 포맷터/린터**: Biome (빠르고 일관된 코드 스타일)
 - **타입 체크**: TypeScript strict 모드
@@ -67,6 +76,13 @@ src/
     ├── lib/         # 유틸리티
     ├── config/      # 설정
     └── index.ts     # 공유 리소스 진입점
+
+ios/                # iOS 프로젝트 디렉토리
+├── App/           # Xcode 프로젝트
+│   ├── App/      # 앱 소스
+│   ├── Podfile   # CocoaPods 의존성
+│   └── App.xcworkspace  # Xcode 워크스페이스
+└── .gitignore    # iOS 관련 gitignore
 ```
 
 ### 레이어별 책임
@@ -700,6 +716,103 @@ REACT_APP_ENV=development
   }
 }
 ```
+
+## iOS 앱 개발 가이드라인
+
+### 스크립트 사용법
+```json
+{
+  "scripts": {
+    "ios:build": "yarn build && npx cap sync ios",  // 웹앱 빌드 후 iOS 프로젝트 동기화
+    "ios:open": "npx cap open ios",                 // Xcode에서 프로젝트 열기
+    "ios:dev": "yarn build && npx cap run ios --scheme App",  // 시뮬레이터에서 실행
+    "ios:serve": "vite build --mode development --watch"  // 개발 중 실시간 리로드
+  }
+}
+```
+
+### Capacitor 설정
+```typescript
+// capacitor.config.ts
+import { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'io.cursor.todolist',
+  appName: 'Todo List',
+  webDir: 'dist',
+  server: {
+    androidScheme: 'https'
+  },
+  ios: {
+    contentInset: 'automatic',
+    preferredContentMode: 'mobile',
+    scheme: 'app',
+    backgroundColor: '#ffffff',
+    limitsNavigationsToAppBoundDomains: true
+  }
+};
+
+export default config;
+```
+
+### 환경 설정 가이드
+1. Ruby 환경 설정
+   ```bash
+   # Ruby 설치
+   brew install ruby
+
+   # 환경 변수 설정 (.zshrc)
+   export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+   export LDFLAGS="-L/opt/homebrew/opt/ruby/lib"
+   export CPPFLAGS="-I/opt/homebrew/opt/ruby/include"
+   ```
+
+2. CocoaPods 설정
+   ```bash
+   # CocoaPods 설치
+   gem install cocoapods
+
+   # PATH 설정 (.zshrc)
+   export PATH="/Users/$USER/.local/share/gem/ruby/3.4.0/bin:$PATH"
+   ```
+
+3. Xcode 설정
+   ```bash
+   # Command Line Tools 설정
+   sudo xcode-select --switch /Applications/Xcode.app
+   ```
+
+### 주의사항 및 모범 사례
+1. 대소문자 구분
+   - Xcode Scheme 이름은 대문자로 시작 ('App')
+   - CLI 명령어에서 `--scheme App` 옵션 사용
+   - 파일 시스템 레벨에서 대소문자 구분됨
+
+2. 빌드 프로세스
+   - 웹앱 빌드 후 iOS 프로젝트 동기화
+   - 변경사항 발생 시 `yarn ios:build` 실행
+   - 개발 중 실시간 리로드는 `yarn ios:serve` 사용
+
+3. 디버깅
+   - Xcode 콘솔에서 웹뷰 로그 확인
+   - Safari 개발자 도구로 웹뷰 디버깅
+   - 시뮬레이터에서 충분히 테스트 후 실제 기기 테스트
+
+4. 보안 고려사항
+   - HTTPS 사용 필수
+   - 앱 권한 설정 주의
+   - 데이터 저장소 암호화
+
+### 업데이트 및 유지보수
+1. 버전 관리
+   - Capacitor 버전 업데이트 시 호환성 확인
+   - iOS 버전 업데이트에 따른 대응
+   - 웹앱 변경사항 동기화
+
+2. 성능 최적화
+   - 웹뷰 성능 모니터링
+   - 네이티브-웹 통신 최적화
+   - 메모리 사용량 관리
 
 이 가이드라인을 따라 개발하면 일관성 있고 유지보수하기 쉬운 코드를 작성할 수 있습니다.
 
