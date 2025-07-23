@@ -2,17 +2,11 @@ import { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "io.cursor.todolist",
-  appName: "Todo List",
+  appName: "TodoList",
   webDir: "dist",
   server: {
-    androidScheme: "https",
-  },
-  ios: {
-    contentInset: "automatic",
-    preferredContentMode: "mobile",
-    scheme: "app",
-    backgroundColor: "#ffffff",
-    limitsNavigationsToAppBoundDomains: true,
+    url: "http://10.120.90.211:5173",
+    cleartext: true,
   },
 };
 
