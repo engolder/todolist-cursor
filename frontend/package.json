@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "ios:build": "node scripts/ios-build.js",
     "ios:open": "npx cap open ios",
-    "ios:dev": "node scripts/setup-live-reload.js && yarn dev"
+    "ios:dev": "node scripts/setup-live-reload.js"
   },
   "dependencies": {
     "@capacitor/core": "7.4.2",

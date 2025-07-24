@@ -6,11 +6,9 @@
 
 ```
 scripts/
-├── utils/                    # 공통 유틸리티 함수들
-│   ├── network.js           # 네트워크 관련 유틸리티
-│   ├── capacitor.js         # Capacitor 관련 유틸리티
-│   └── dev-server.js        # 개발 서버 관련 유틸리티
-├── setup-live-reload.js     # Live Reload 기본 설정
+├── utils/
+│   └── network.js           # 네트워크 관련 유틸리티
+├── setup-live-reload.js     # iOS Live Reload 실행
 ├── ios-build.js             # iOS 앱 빌드
 └── README.md                # 이 파일
 ```
@@ -22,14 +20,19 @@ scripts/
 #### 1. Live Reload 개발
 
 ```bash
-# Xcode 열기 + 개발 서버
-yarn ios:dev
+# 1. 프론트엔드 개발 서버 실행 (터미널 1)
+yarn dev
+
+# 2. iOS 앱을 Live Reload 모드로 실행 (터미널 2)
+yarn ios:live
+# 또는
+npx cap run ios --live-reload --host <IP> --port 5173
 ```
 
 **특징:**
 - ✅ 자동 IP 감지
-- ✅ Xcode 열기 + 개발 서버
-- ✅ Live Reload 지원
+- ✅ iOS 앱 Live Reload 자동 실행
+- ✅ 프론트엔드 서버와 iOS 앱 실행 분리 필요
 
 #### 2. iOS 앱 빌드
 
@@ -43,13 +46,6 @@ yarn ios:build
 - ✅ iOS 프로젝트 동기화
 - ✅ 배포 준비 완료
 
-#### 3. Xcode 열기
-
-```bash
-# Xcode에서 프로젝트 열기
-yarn ios:open
-```
-
 ## 🔧 유틸리티 함수
 
 ### network.js
@@ -57,37 +53,24 @@ yarn ios:open
 - `getLiveReloadURL(ip, port)`: Live Reload URL 생성
 - `logNetworkInfo(ip, port)`: 네트워크 정보 출력
 
-### capacitor.js
-- `syncIOSProject()`: iOS 프로젝트 동기화
-- `openXcode()`: Xcode 열기
-- `runIOSWithLiveReload(ip, port, scheme)`: Live Reload로 iOS 실행
-- `runIOSWithBuild(scheme)`: 빌드 기반으로 iOS 실행
-
-### dev-server.js
-- `startViteDevServer()`: Vite 개발 서버 시작
-- `killProcess(process, name)`: 프로세스 안전 종료
-- `setupProcessHandlers(viteProcess)`: 프로세스 종료 핸들러 설정
-
 ## 📋 개발 워크플로우
 
 ### Live Reload 개발
-1. `yarn ios:dev` 실행
-2. Xcode 자동 열기
-3. Vite 개발 서버 시작
-4. 코드 수정 시 자동 반영
+1. `yarn dev` 실행 (프론트엔드 개발 서버)
+2. `yarn ios:live` 실행 (iOS 앱 Live Reload)
+   - 두 명령어를 각각 터미널에서 실행하거나, concurrently 등으로 병렬 실행 가능
+3. 코드 수정 시 자동 반영
 
 ### 배포 준비
 1. `yarn ios:build` 실행
 2. 웹앱 빌드 및 iOS 동기화
-3. `yarn ios:open`으로 Xcode 열기
-4. Xcode에서 최종 빌드 및 배포
+3. Xcode에서 최종 빌드 및 배포
 
 ## ⚠️ 주의사항
 
 1. **디렉토리 위치**: 모든 명령어는 `frontend` 디렉토리에서 실행
 2. **네트워크 환경**: Live Reload 사용 시 기기와 컴퓨터가 같은 Wi-Fi에 연결
-3. **Git 관리**: `ios:dev` 사용 시 Git 변경사항 발생 가능
-4. **프로세스 종료**: Ctrl+C로 안전하게 종료 가능
+3. **프로세스 종료**: Ctrl+C로 안전하게 종료 가능
 
 ## 🐛 문제 해결
 
@@ -99,26 +82,4 @@ yarn ios:open
 ### 빌드 오류가 발생하는 경우
 1. 의존성 확인: `yarn install`
 2. 캐시 정리: `yarn build --force`
-3. iOS 프로젝트 재생성: `rm -rf ios && npx cap add ios`
-
-## 🔮 향후 확장 계획
-
-### Android 개발
-- Android Studio 연동 스크립트
-- Android Live Reload 지원
-- Android 빌드 자동화
-
-### 웹 개발
-- 웹 개발 서버 설정
-- 브라우저 자동 열기
-- Hot Module Replacement 설정
-
-### 테스트
-- 테스트 실행 스크립트
-- 테스트 커버리지 측정
-- E2E 테스트 자동화
-
-### 배포
-- 자동 배포 스크립트
-- 환경별 설정 관리
-- 배포 전 검증 자동화 
+3. iOS 프로젝트 재생성: `rm -rf ios && npx cap add ios` 
