@@ -150,43 +150,40 @@
 
 ### 4. Live Reload 설정 [🔄]
    - 목적: 프론트엔드 코드 변경사항 실시간 반영
+   - 참고: Capacitor v7 기준 ([공식 문서](https://capacitorjs.com/docs/guides/live-reload))
 
-   1. 기본 설정
-      ```typescript
-      // capacitor.config.ts
-      const config: CapacitorConfig = {
-        appId: 'io.cursor.todolist',
-        appName: 'TodoList',
-        webDir: 'dist'
-      };
-      ```
-
-   2. 실행 방법
+   1. Ionic CLI 설치 (필수)
       ```bash
-      # 1. 프론트엔드 개발 서버 실행
-      cd frontend && yarn dev
-
-      # 2. 기기 ID 확인 및 실행
-      npx cap run ios --target=YOUR_DEVICE_ID --live-reload
-      # 에러 메시지에서 사용 가능한 기기 ID 목록 확인 가능
+      npm install -g @ionic/cli native-run
       ```
 
-   3. 문제 해결
-      - 검은 화면이 나오는 경우:
-        ```bash
-        # 캐시 삭제 후 재시도
-        rm -rf dist/ ios/App/App/public/
-        yarn build && npx cap sync ios
-        ```
-      - VPN이나 회사 네트워크에서 문제가 발생하는 경우:
-        - 네트워크 IP를 직접 지정
-        ```typescript
-        // capacitor.config.ts
-        server: {
-          url: 'http://YOUR_IP:5173',
-          cleartext: true
+   2. Live Reload 실행
+      ```bash
+      # iOS 앱 실행
+      ionic cap run ios -l --external
+
+      # Android 앱 실행
+      ionic cap run android -l --external
+      ```
+
+   3. 수동 설정 방법 (Ionic CLI 없이 설정하는 경우)
+      ```typescript
+      // capacitor.config.json
+      {
+        "server": {
+          "url": "http://YOUR_IP:5173", // YOUR_IP는 컴퓨터의 로컬 IP 주소
+          "cleartext": true
         }
-        ```
+      }
+      ```
+
+      - macOS에서 IP 확인: `ifconfig` 실행 후 `en0` 항목의 `inet` 주소
+      - Windows에서 IP 확인: `ipconfig` 실행 후 `IPv4` 주소
+
+   4. 주의사항
+      - 실제 기기 테스트 시 기기와 컴퓨터가 동일 Wi-Fi 네트워크에 연결되어 있어야 함
+      - `server` 설정은 소스 컨트롤에 커밋하지 않도록 주의
+      - 개발 완료 후 `server` 설정 제거 필수
 
   ### 5. TestFlight 배포 계획
 
