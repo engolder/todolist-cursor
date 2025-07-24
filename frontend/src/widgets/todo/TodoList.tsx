@@ -22,6 +22,17 @@ export const TodoList: FC = () => {
         <h1 className={styles.title}>할 일 목록</h1>
       </header>
 
+      <div className={styles.list}>
+        {todos.map((todo: Todo) => (
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            onToggle={toggleTodo}
+            onDelete={deleteTodo}
+          />
+        ))}
+      </div>
+
       <form className={styles.form} onSubmit={handleSubmit}>
         <input
           type="text"
@@ -34,17 +45,6 @@ export const TodoList: FC = () => {
           추가
         </button>
       </form>
-
-      <div className={styles.list}>
-        {todos.map((todo: Todo) => (
-          <TodoItem
-            key={todo.id}
-            todo={todo}
-            onToggle={toggleTodo}
-            onDelete={deleteTodo}
-          />
-        ))}
-      </div>
     </div>
   );
 }

@@ -1,25 +1,27 @@
 import { getLocalIP, logNetworkInfo } from "./utils/network.js";
-import { syncIOSProject, openXcode } from "./utils/capacitor.js";
+import { execSync } from "child_process";
 
 /**
- * Live Reload 설정을 위한 기본 설정을 수행합니다.
- * Xcode를 열고 개발 서버 실행을 위한 준비를 합니다.
+ * iOS Live Reload를 자동으로 실행합니다.
  */
 function setupLiveReload() {
   const ip = getLocalIP();
   logNetworkInfo(ip);
+  const port = 5173;
+  const scheme = "App";
 
   // iOS 프로젝트 동기화
-  syncIOSProject();
+  console.log("🔄 Syncing iOS project (cap sync ios)...");
+  execSync("npx cap sync ios", { stdio: "inherit" });
 
-  // Xcode 열기
-  openXcode();
-
-  console.log("🚀 Live Reload setup complete!");
-  console.log(`💡 Use 'yarn ios:dev:live' to start with Live Reload`);
-  console.log(
-    `💡 Or manually: 'npx cap run ios --live-reload --host ${ip} --port 5173'`
+  // Live Reload로 iOS 앱 실행
+  console.log("📱 Starting iOS app with Live Reload...");
+  execSync(
+    `npx cap run ios --live-reload --host ${ip} --port ${port} --scheme ${scheme}`,
+    { stdio: "inherit" }
   );
+
+  console.log("🚀 iOS Live Reload started automatically!");
 }
 
 // 스크립트 실행

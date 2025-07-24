@@ -24,16 +24,13 @@ npx cap open ios
 #### 1.3 Live Reload 개발 방법
 ```bash
 # 1. Vite 개발 서버 시작
+# (프론트엔드 서버와 iOS 앱 실행을 반드시 분리해야 함)
 yarn dev
 
-# 2. capacitor.config.ts에 server 설정 추가
-# server: { url: "http://<IP>:5173", cleartext: true }
-
-# 3. iOS 프로젝트 동기화
-npx cap copy ios
-
-# 4. Xcode에서 앱 실행
-npx cap open ios
+# 2. iOS 앱을 Live Reload 모드로 실행 (별도 터미널에서)
+yarn ios:live
+# 또는
+npx cap run ios --live-reload --host <IP> --port 5173
 ```
 
 ### 2. 자동화 스크립트 개발 과정
@@ -45,16 +42,17 @@ npx cap open ios
 
 #### 2.2 자동화 스크립트 구현
 ```bash
-# 최종 자동화 스크립트
-yarn ios:dev
+# (실제 자동화는 두 명령어를 병렬 실행하거나, 각각 터미널에서 실행해야 함)
+yarn dev & yarn ios:live
+# 또는 concurrently, npm-run-all 등으로 병렬 실행
 ```
 
 **동작 과정:**
 1. 현재 IP 주소 자동 감지
 2. capacitor.config.ts 자동 업데이트
-3. iOS 프로젝트 동기화
-4. Xcode 열기
-5. Vite 개발 서버 실행
+3. iOS 프로젝트 동기화 (필요시)
+4. Vite 개발 서버 실행
+5. iOS 앱을 Live Reload 모드로 실행 (별도 명령어)
 
 #### 2.3 스크립트 정리
 ```
@@ -76,8 +74,11 @@ scripts/
 
 #### 3.1 Live Reload 개발
 ```bash
-yarn ios:dev
-# 하나의 명령어로 모든 과정 자동화
+# (하나의 명령어로 모든 과정 자동화는 현실적으로 불가)
+yarn dev         # 프론트엔드 개발 서버 실행
+yarn ios:live    # iOS 앱 Live Reload 실행 (별도 터미널)
+# 또는
+yarn dev:ios     # concurrently 등으로 병렬 실행
 ```
 
 #### 3.2 배포 준비

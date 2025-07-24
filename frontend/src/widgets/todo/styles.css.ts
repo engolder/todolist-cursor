@@ -1,10 +1,13 @@
 import { style } from '@vanilla-extract/css'
 
 export const container = style({
-  maxWidth: '600px',
-  margin: '0 auto',
-  padding: '2rem',
-})
+  maxWidth: "600px",
+  margin: "0 auto",
+  paddingTop: "env(safe-area-inset-top, 1rem)", // 상단 Safe Area 적용
+  paddingLeft: "1rem",
+  paddingRight: "1rem",
+  paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4.5rem)", // 하단 Safe Area + 입력창 높이
+});
 
 export const header = style({
   marginBottom: '2rem',
@@ -19,10 +22,20 @@ export const title = style({
 })
 
 export const form = style({
-  display: 'flex',
-  gap: '0.5rem',
-  marginBottom: '2rem',
-})
+  display: "flex",
+  gap: "0.5rem",
+  position: "fixed",
+  left: 0,
+  bottom: 0,
+  width: "100vw",
+  maxWidth: "600px",
+  margin: "0 auto",
+  padding: "1rem",
+  background: "#f9fafb",
+  borderTop: "1px solid #e5e7eb",
+  zIndex: 10,
+  paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.5rem)",
+});
 
 export const input = style({
   flex: 1,
