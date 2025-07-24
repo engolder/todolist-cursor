@@ -222,10 +222,57 @@ worklogs/
   - 예: `refactor-api-client`
 
 ### 3.2 브랜치 생성 및 커밋
-다음 상황에서만 PR 생성 프로세스 진행:
-1. 사용자가 명시적으로 "PR 생성" 요청한 경우
 
-PR 생성 전 필수 확인사항:
+#### 커밋 요청 시 브랜치 결정 프로세스
+
+1. 현재 브랜치 확인
+   ```bash
+   # 현재 브랜치 확인
+   git branch --show-current
+   ```
+
+2. 브랜치별 처리 방법
+   - main 브랜치인 경우:
+     - 새로운 브랜치 생성 후 원래의 PR 생성 가이드대로 진행
+
+   - 기존 브랜치인 경우:
+     1. main 브랜치와의 관계 확인
+        ```bash
+        # main과의 차이 확인
+        git fetch origin main
+        git rev-list --count main..HEAD  # 현재 브랜치에만 있는 커밋 수
+        git rev-list --count HEAD..main  # main에만 있는 커밋 수
+        ```
+        - 이미 main에 머지된 브랜치라면:
+          - main으로 이동 후 새로운 브랜치 생성
+          - 원래의 PR 생성 가이드대로 진행
+
+     2. 열린 PR 확인
+        ```bash
+        # 현재 브랜치의 PR 상태 확인 (여러 방법으로 검증)
+        gh pr view
+        # gh pr view 실패 시 추가 확인
+        gh pr list --head $(git branch --show-current)
+        # 여전히 확인 안되면 GitHub 웹에서 직접 확인
+        gh browse -p
+        ```
+        - PR이 있는 경우:
+          - PR 제목과 설명 검토
+          - 현재 변경사항이 PR의 목적과 관련있는지 확인
+          - 관련 없는 문서(rule/readme 등) 변경은 함께 포함 가능
+          - 기능 관련 변경사항은 별도 브랜치로 분리
+        - PR 확인 실패 시:
+          - 모든 확인 방법을 시도할 것
+          - 확인이 안되면 사용자에게 PR 상태 문의
+          - GitHub 웹 인터페이스로 직접 확인 권장
+
+     3. 새 브랜치 필요성 판단
+        - 기능 변경사항이거나 PR과 무관한 경우:
+          1. 사용자에게 상황 설명 및 새 브랜치 생성 제안
+          2. 승인 시 main에서 새 브랜치 생성
+          3. 원래의 PR 생성 가이드대로 진행
+
+#### PR 생성 전 필수 확인사항
 1. staged 상태인 파일 목록 확인
    ```bash
    # staged 파일 목록 확인
