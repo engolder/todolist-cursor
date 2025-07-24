@@ -249,22 +249,49 @@ worklogs/
 
      2. 열린 PR 확인
         ```bash
-        # 현재 브랜치의 PR 상태 확인 (여러 방법으로 검증)
+        # 현재 브랜치의 PR 상태 확인
         gh pr view
-        # gh pr view 실패 시 추가 확인
+        ```
+        - 주의사항:
+          - gh CLI 설정 및 인증 상태 확인
+            ```bash
+            # gh 인증 상태 확인
+            gh auth status
+            # 필요시 재인증
+            gh auth login
+            ```
+          - 일부 에러 메시지(예: "head: |: No such file or directory")가 표시되더라도 PR 정보는 정상적으로 표시될 수 있음
+            - 이는 Cursor IDE와 gh CLI 간의 터미널 출력 처리 호환성 문제
+            - 에러 메시지가 나타나더라도 PR 정보가 표시되는지 먼저 확인
+            - **해결 방법**: 에러 메시지를 필터링하여 정상 출력 확인
+              ```bash
+              # PR 정보 확인 (에러 메시지 필터링)
+              gh pr view 2>&1 | grep -v "head: |: No such file or directory" | grep -v "head: cat: No such file or directory"
+              
+              # PR 목록 확인 (에러 메시지 필터링)
+              gh pr list 2>&1 | grep -v "head: |: No such file or directory" | grep -v "head: cat: No such file or directory"
+              
+              # 저장소 정보 확인 (에러 메시지 필터링)
+              gh repo view 2>&1 | grep -v "head: |: No such file or directory" | grep -v "head: cat: No such file or directory"
+              ```
+          - PR 정보가 전혀 표시되지 않을 때:
+            1. gh CLI 인증 상태 확인
+            2. 사용자에게 PR 상태 확인 요청
+            3. GitHub 웹 인터페이스로 직접 확인
+        
+        - PR 정보가 표시되지 않는 경우 추가 확인:
+        ```bash
+        # 현재 브랜치의 PR 목록 확인
         gh pr list --head $(git branch --show-current)
-        # 여전히 확인 안되면 GitHub 웹에서 직접 확인
+        # GitHub 웹에서 직접 확인
         gh browse -p
         ```
+
         - PR이 있는 경우:
-          - PR 제목과 설명 검토
+          - PR 제목과 설명 검토 (draft PR도 포함)
           - 현재 변경사항이 PR의 목적과 관련있는지 확인
           - 관련 없는 문서(rule/readme 등) 변경은 함께 포함 가능
           - 기능 관련 변경사항은 별도 브랜치로 분리
-        - PR 확인 실패 시:
-          - 모든 확인 방법을 시도할 것
-          - 확인이 안되면 사용자에게 PR 상태 문의
-          - GitHub 웹 인터페이스로 직접 확인 권장
 
      3. 새 브랜치 필요성 판단
         - 기능 변경사항이거나 PR과 무관한 경우:
@@ -383,6 +410,15 @@ gh pr create \
 - 오류 상황 명확히 파악하고 원인 분석
 - 해결 방안의 영향도 평가 후 사용자에게 제시
 - 환경 설정 문제는 영구적 해결 방안 우선 제시
+
+#### 개발 도구 호환성 문제 해결
+- **Cursor IDE 환경에서 발생하는 특정 도구 호환성 문제 인지**
+  - 에러 메시지가 나타나더라도 실제 기능이 정상 작동할 수 있음
+  - 출력 리다이렉션을 통한 실제 동작 확인의 중요성
+  - 예시: gh CLI의 `head: |: No such file or directory` 에러
+    - 실제로는 PR 정보가 정상 출력되고 있음
+    - Cursor의 터미널 출력 처리 방식 문제
+    - 해결: 에러 메시지 필터링을 통한 정상 출력 확인
 
 ### 4.2 커뮤니케이션 원칙
 - 명확하고 구조화된 형식으로 보고
