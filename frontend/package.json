@@ -8,10 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "ios:build": "yarn build && npx cap sync ios",
+    "ios:build": "node scripts/ios-build.js",
     "ios:open": "npx cap open ios",
-    "ios:dev": "yarn ios:serve & npx cap run ios --scheme App",
-    "ios:serve": "vite build --mode development --watch"
+    "ios:dev": "node scripts/setup-live-reload.js && yarn dev"
   },
   "dependencies": {
     "@capacitor/core": "7.4.2",
