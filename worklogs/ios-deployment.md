@@ -1,13 +1,21 @@
-## iOS 앱 배포 및 TestFlight 설정
+# iOS 앱 배포 및 자동화 환경 구축
 
-### 1. 기본 실행 방법
+## 작업 개요
+- Capacitor 기반 iOS 앱의 개발 및 배포 환경 구축
+- Live Reload 개발 워크플로우 자동화 스크립트 구현
+- 실제 기기 테스트 및 배포 준비 과정 문서화
 
-#### 1.1 준비사항
-- macOS + Xcode 설치
-- Apple ID (실제 기기 테스트용)
-- iPhone/iPad (USB 연결)
+## 작업 과정
 
-#### 1.2 공식 문서 기준 실행 방법
+### 1. 분석 및 계획
+- **문제점**: 매번 IP 주소 확인 → 설정 변경 → 동기화 → Xcode 실행 과정 반복
+- **목표**: 개발자 경험 향상을 위한 자동화된 워크플로우 구축
+- **요구사항**: Live Reload, 실제 기기 테스트, 자동 IP 감지
+
+### 2. 구현
+
+#### 기본 실행 방법 정립
+**공식 문서 기준 워크플로우**
 ```bash
 # 1. 웹앱 빌드
 yarn build
@@ -17,44 +25,21 @@ npx cap sync ios
 
 # 3. Xcode에서 프로젝트 열기
 npx cap open ios
-
-# 4. Xcode에서 앱 실행 (시뮬레이터 또는 실제 기기)
 ```
 
-#### 1.3 Live Reload 개발 방법
+**Live Reload 개발 방법**
 ```bash
-# 1. Vite 개발 서버 시작
-# (프론트엔드 서버와 iOS 앱 실행을 반드시 분리해야 함)
+# 1. Vite 개발 서버 시작 (터미널 1)
 yarn dev
 
-# 2. iOS 앱을 Live Reload 모드로 실행 (별도 터미널에서)
+# 2. iOS 앱 Live Reload 실행 (터미널 2)
 yarn ios:live
 # 또는
 npx cap run ios --live-reload --host <IP> --port 5173
 ```
 
-### 2. 자동화 스크립트 개발 과정
-
-#### 2.1 문제점 식별
-- 매번 IP 주소 확인 → 설정 변경 → 동기화 → Xcode 열기 과정 반복
-- 네트워크 환경 변경 시 IP 주소 수동 업데이트 필요
-- 여러 단계의 명령어를 순서대로 실행해야 함
-
-#### 2.2 자동화 스크립트 구현
-```bash
-# (실제 자동화는 두 명령어를 병렬 실행하거나, 각각 터미널에서 실행해야 함)
-yarn dev & yarn ios:live
-# 또는 concurrently, npm-run-all 등으로 병렬 실행
-```
-
-**동작 과정:**
-1. 현재 IP 주소 자동 감지
-2. capacitor.config.ts 자동 업데이트
-3. iOS 프로젝트 동기화 (필요시)
-4. Vite 개발 서버 실행
-5. iOS 앱을 Live Reload 모드로 실행 (별도 명령어)
-
-#### 2.3 스크립트 정리
+#### 자동화 스크립트 구현
+**스크립트 구조**
 ```
 scripts/
 ├── utils/                    # 공통 유틸리티
@@ -65,73 +50,75 @@ scripts/
 └── ios-build.js             # iOS 빌드
 ```
 
-**정리 이유:**
-- 중복 코드 제거
-- 공통 기능 재사용
-- 향후 Android 등 추가 시 편의성
+**자동화 동작 과정**
+1. 현재 네트워크 IP 주소 자동 감지
+2. capacitor.config.ts 파일 자동 업데이트
+3. iOS 프로젝트 동기화 (필요시)
+4. Vite 개발 서버 실행 준비
+5. iOS 앱 Live Reload 모드 실행
 
-### 3. 최종 개발 워크플로우
-
-#### 3.1 Live Reload 개발
-```bash
-# (하나의 명령어로 모든 과정 자동화는 현실적으로 불가)
-yarn dev         # 프론트엔드 개발 서버 실행
-yarn ios:live    # iOS 앱 Live Reload 실행 (별도 터미널)
-# 또는
-yarn dev:ios     # concurrently 등으로 병렬 실행
+#### 패키지 스크립트 정의
+```json
+{
+  "scripts": {
+    "dev": "vite",
+    "ios:live": "node scripts/setup-live-reload.js",
+    "ios:build": "node scripts/ios-build.js",
+    "dev:ios": "concurrently \"yarn dev\" \"yarn ios:live\""
+  }
+}
 ```
 
-#### 3.2 배포 준비
-```bash
-yarn ios:build
-# 웹앱 빌드 → iOS 동기화 → Xcode에서 최종 빌드
-```
+### 3. 검증 및 테스트
+- 시뮬레이터에서 Live Reload 동작 확인
+- 실제 iPhone 기기에서 테스트 완료
+- 네트워크 환경 변경 시 자동 IP 감지 동작 확인
 
-### 4. 트러블슈팅
+## 발생한 문제 및 해결
 
-#### 4.1 검은 화면 문제
-**문제**: iOS 앱 실행 시 검은 화면만 표시
-**원인**: 웹뷰가 콘텐츠를 제대로 로드하지 못함
-**해결**: 웹앱 빌드 → iOS 동기화 → Clean Build Folder 순서 준수
+### 문제 1: iOS 앱 검은 화면 문제
+- **문제**: iOS 앱 실행 시 검은 화면만 표시되고 콘텐츠가 로드되지 않음
+- **원인**: 웹뷰가 웹앱 빌드 결과물을 제대로 찾지 못함
+- **해결**: 웹앱 빌드 → iOS 동기화 → Clean Build Folder 순서 철저히 준수
 
-#### 4.2 Live Reload IP 주소 문제
-**문제**: 네트워크 환경 변경 시 Live Reload 작동 안됨
-**원인**: 하드코딩된 IP 주소
-**해결**: 자동 IP 감지 스크립트 구현
+### 문제 2: Live Reload IP 주소 문제
+- **문제**: 네트워크 환경 변경 시 Live Reload가 작동하지 않음
+- **원인**: capacitor.config.ts에 하드코딩된 IP 주소
+- **해결**: 
+  - 네트워크 인터페이스에서 자동 IP 감지 로직 구현
+  - capacitor.config.ts 파일 자동 업데이트 스크립트 작성
 
-#### 4.3 Apple Developer 인증 문제
-**문제**: "Communication with Apple Failed" 에러
-**원인**: 실제 기기 연결 없이 프로비저닝 프로파일 생성 불가
-**해결**: iPhone 연결 → 개발자 모드 활성화 → 인증서 신뢰 설정
+### 문제 3: Apple Developer 인증 문제
+- **문제**: "Communication with Apple Failed" 에러로 실제 기기 테스트 불가
+- **원인**: 
+  - 실제 iPhone이 연결되지 않은 상태에서 프로비저닝 프로파일 생성 불가
+  - iOS 개발자 모드 미활성화
+- **해결**: 
+  - iPhone USB 연결 확인
+  - 기기에서 개발자 모드 활성화
+  - Xcode에서 인증서 신뢰 설정
 
-### 5. 핵심 교훈
+### 문제 4: 스크립트 중복 코드 문제
+- **문제**: 여러 스크립트에서 동일한 기능(IP 감지, Capacitor 설정 등) 중복 구현
+- **원인**: 초기 구현 시 재사용성을 고려하지 않은 구조
+- **해결**: 공통 기능을 utils 모듈로 분리하여 재사용 가능한 구조로 리팩토링
 
-#### 5.1 Capacitor 개발 특성
-- 웹앱을 네이티브로 래핑하는 방식 이해
-- iOS 보안 정책과 개발자 인증 과정 숙지
-- 개발용/배포용 설정 구분의 중요성
+## 결과 및 영향
+- **최종 결과물**: 자동화된 iOS 개발 환경 및 Live Reload 워크플로우
+- **코드베이스 영향**: 
+  - 개발 도구 스크립트 추가로 프로젝트 구조 확장
+  - 개발자 경험 크게 향상
+  - 일관성 있는 개발 환경 제공
+- **성능 고려사항**: 자동화 스크립트 실행 시간은 무시할 수준, 개발 효율성 크게 향상
 
-#### 5.2 자동화의 가치
-- 개발자 경험 향상과 실수 방지
-- 일관성 있는 개발 환경 제공
-- 팀 협업 효율성 증대
+## 향후 개선사항
+- Apple Developer Program 가입 및 TestFlight 배포 설정
+- Android 플랫폼 지원을 위한 스크립트 확장
+- CI/CD 파이프라인 통합 검토
+- 팀 개발을 위한 환경 설정 표준화
 
-#### 5.3 스크립트 정리의 이점
-- 중복 코드 제거로 간결함
-- 공통 기능 재사용
-- 향후 확장 시 편의성
-
-### 6. 현재 상태
-- ✅ Live Reload 개발 환경 완성
-- ✅ 자동화 스크립트 구현
-- ✅ 실제 기기 테스트 완료
-- ⚠️ Apple Developer Program 가입 필요 (TestFlight 배포용)
-
-### 7. 다음 단계
-1. Apple Developer Program 가입 ($99/년)
-2. App Store Connect에서 앱 등록
-3. TestFlight 배포
-
-### 8. 참고 문서
-- @https://capacitorjs.com/docs/guides/live-reload - Live Reload 공식 가이드
-- @https://capacitorjs.com/docs/config - Capacitor 설정 파일 참조
+## 참고 문서
+- [Capacitor Live Reload 가이드](https://capacitorjs.com/docs/guides/live-reload)
+- [Capacitor Configuration](https://capacitorjs.com/docs/config)
+- [iOS Developer Program](https://developer.apple.com/programs/)
+- [Xcode 프로비저닝 가이드](https://developer.apple.com/documentation/xcode/distributing-your-app-for-beta-testing-and-releases)

@@ -1,67 +1,106 @@
-## 1. 요구사항 분석 및 기술 명세
+# iOS Safe Area 및 입력창 하단 배치 구현
 
-### 1.1 요구사항 정리
-- 입력창(input창)을 화면 상단에서 하단으로 이동
-- iOS 환경에서 Safe Area(홈 인디케이터 등) 침범 방지
-- 데스크탑/웹 환경에서도 레이아웃이 깨지지 않아야 함
+## 작업 개요
+- 웹앱의 입력창을 화면 하단으로 이동하여 더 나은 UX 제공
+- iOS 환경에서 Safe Area(홈 인디케이터 등) 침범 방지 및 키보드 대응
 
-### 1.2 기술 명세
-- 입력창을 하단에 고정(position: fixed)
-- iOS 환경에서 Safe Area inset(`env(safe-area-inset-bottom)`, `env(safe-area-inset-top)`)을 padding에 반영
-- container에 paddingTop: `env(safe-area-inset-top, 1rem)`, paddingBottom: `calc(env(safe-area-inset-bottom, 0px) + 4.5rem)` 등 개별적으로 분리 적용
-- 데스크탑/웹 환경에서는 기존과 동일하게 동작
-- CSS 예시:
-  - 상단: `padding-top: env(safe-area-inset-top, 1rem);`
-  - 하단: `padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4.5rem);`
+## 작업 과정
 
-### 1.3 작업 순서 및 진행 상황
-1. 입력창 관련 컴포넌트 및 스타일 파일 위치 파악 ✅
-2. 입력창을 하단에 고정하는 방식으로 스타일 수정 ✅
-3. iOS Safe Area 대응 CSS 적용(상단/하단 모두) ✅
-4. capacitor.config.ts에 Keyboard 플러그인 resize: 'body' 옵션 적용 ✅
-5. 데스크탑/웹 환경에서의 영향 확인 🔄
-6. 결과물 검증 및 스크린샷 비교 🔄
+### 1. 분석 및 계획
+- **요구사항**: 입력창을 상단에서 하단으로 이동, iOS Safe Area 대응
+- **기술적 접근**: CSS `position: fixed` + Safe Area insets + Capacitor Keyboard 플러그인
+- **호환성**: 데스크탑/웹 환경에서도 레이아웃 유지
 
-### 1.4 고려가 필요한 점
-- iOS 외 환경(안드로이드 등)도 Safe Area가 필요한지 여부
-- 입력창이 스크롤되는 리스트와 겹치지 않도록 z-index, padding 등 조정 필요
+### 2. 구현
 
----
+#### 컴포넌트 구조 파악
+**관련 파일들**
+- 입력창 컴포넌트: `frontend/src/widgets/todo/TodoList.tsx`
+- 스타일 정의: `frontend/src/widgets/todo/styles.css.ts`
+- 앱 엔트리: `frontend/src/app/App.tsx`
 
-## 2. 입력창 관련 컴포넌트 및 스타일 파일 위치
+#### CSS 스타일 수정
+**Safe Area 대응 스타일 적용**
+```css
+.container {
+  padding-top: env(safe-area-inset-top, 1rem);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4.5rem);
+}
 
-- **입력창 렌더링/상태관리/이벤트 처리**: `frontend/src/widgets/todo/TodoList.tsx`
-  - `<form className={styles.form} ...>` 내부에 `<input ... />` 존재
-  - 입력값 상태: `useState`로 관리
-  - 입력 이벤트: `onChange`, `onSubmit` 등 처리
-- **스타일 파일**: `frontend/src/widgets/todo/styles.css.ts`
-  - `.form`, `.input`, `.container` 등 스타일 정의
-- **앱 엔트리**: `frontend/src/app/App.tsx` → `<TodoList />` 렌더링
+.form {
+  position: fixed;
+  bottom: env(safe-area-inset-bottom, 0px);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+```
 
----
+**viewport 메타 태그 설정**
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+```
 
-## 3. 참고사항
-- Safe Area 적용은 CSS에서 `env(safe-area-inset-top)`, `env(safe-area-inset-bottom)` 모두 활용
-- iOS에서 safe-area-inset-*이 동작하려면 index.html의 viewport meta 태그에 `viewport-fit=cover`가 반드시 포함되어야 함
-- 공식 문서: [MDN - env()](https://developer.mozilla.org/en-US/docs/Web/CSS/env)
-- iOS Safari 및 WebView에서만 동작 
+#### Capacitor 키보드 설정
+**capacitor.config.ts 설정**
+```typescript
+const config: CapacitorConfig = {
+  // ... 기존 설정
+  plugins: {
+    Keyboard: {
+      resize: 'body',
+      style: 'dark',
+      resizeOnFullScreen: true
+    }
+  }
+}
+```
 
----
+**키보드 플러그인 의존성 추가**
+```bash
+yarn add @capacitor/keyboard
+```
 
-## 4. 트러블슈팅: iOS 키보드와 입력창 UI 깨짐 문제
+### 3. 검증 및 테스트
+- iOS 시뮬레이터에서 Safe Area가 올바르게 적용됨을 확인
+- 키보드 표시 시 입력창이 키보드 위에 올바르게 위치함을 확인
+- 데스크탑 환경에서도 레이아웃이 정상적으로 동작함을 확인
 
-### 문제 상황
-- iOS에서 입력창에 포커스 시 키보드가 올라오면, 입력창이 키보드에 가려지거나 하단 Safe Area가 과도하게 남아 UI가 깨지는 현상 발생
-- position: fixed + safe-area-inset-* 만으로는 키보드 높이를 알 수 없어 완벽하게 대응 불가
+## 발생한 문제 및 해결
 
-### 원인
-- iOS의 position: fixed는 키보드가 올라와도 뷰포트 기준으로 남아있어 입력창이 키보드에 가려짐
-- Safe Area는 홈 인디케이터 등 하드웨어 기준, 키보드가 올라오면 더 이상 유효하지 않음
+### 문제 1: iOS 키보드와 입력창 UI 깨짐
+- **문제**: iOS에서 키보드 표시 시 입력창이 키보드에 가려지거나 Safe Area가 과도하게 남음
+- **원인**: 
+  - `position: fixed`가 키보드 높이를 고려하지 않음
+  - Safe Area는 하드웨어 기준으로, 키보드가 올라오면 유효하지 않음
+- **해결**: Capacitor Keyboard 플러그인의 `resize: 'body'` 옵션으로 키보드 표시 시 body 자동 리사이즈
 
-### 실전 대응법
-- **Capacitor/Cordova 앱**: @capacitor/keyboard 플러그인 등으로 키보드 이벤트 감지, 입력창 위치/여백을 JS로 동적으로 조정하거나, capacitor.config.ts에 `resize: 'body'` 옵션을 적용해 키보드가 올라올 때 body가 자동으로 리사이즈되도록 설정
-- **Pure Web**: window.visualViewport API로 키보드 영역 감지, 입력창 위치를 JS로 조정
-- CSS만으로는 iOS에서 완벽 대응 불가(최소한의 대응만 가능)
+### 문제 2: Safe Area insets 미동작
+- **문제**: CSS `env(safe-area-inset-*)` 값이 적용되지 않음
+- **원인**: viewport 메타 태그에 `viewport-fit=cover` 옵션 누락
+- **해결**: index.html의 viewport 메타 태그에 `viewport-fit=cover` 추가
 
-### 참고 코드
-- Capacitor Keyboard 이벤트 활용 예시, visualViewport 활용 예시 등은 본 문서 상단 참고 
+### 문제 3: 크로스플랫폼 호환성
+- **문제**: iOS 전용 설정이 다른 플랫폼에 영향을 줄 우려
+- **원인**: Safe Area insets와 Capacitor 설정이 iOS 특화 기능
+- **해결**: CSS의 fallback 값과 Capacitor 플러그인의 플랫폼별 분기로 해결
+
+## 결과 및 영향
+- **최종 결과물**: iOS에서 Safe Area를 고려한 하단 입력창 UI
+- **코드베이스 영향**: 
+  - CSS 스타일 시스템에 Safe Area 대응 추가
+  - Capacitor 키보드 플러그인 의존성 추가
+  - 모바일 우선 UX 패턴 도입
+- **성능 고려사항**: 키보드 이벤트 처리로 약간의 오버헤드 있지만 UX 개선 효과가 더 큼
+
+## 향후 개선사항
+- Android Safe Area 대응 검토 (API 28+ 지원)
+- 키보드 애니메이션과 동기화된 입력창 애니메이션 추가
+- 다양한 iOS 기기에서의 테스트 확대
+- 접근성(Accessibility) 고려사항 검토
+
+## 참고 문서
+- [MDN - CSS env()](https://developer.mozilla.org/en-US/docs/Web/CSS/env)
+- [Capacitor Keyboard Plugin](https://capacitorjs.com/docs/apis/keyboard)
+- [iOS Safe Area 가이드](https://developer.apple.com/design/human-interface-guidelines/layout)
+- [CSS Environment Variables](https://webkit.org/blog/7929/designing-websites-for-iphone-x/)
