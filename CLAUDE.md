@@ -70,6 +70,12 @@ gh pr create \
   --assignee "@me"
 ```
 
+#### 커밋 및 PR 작성 시 주의사항
+- **절대 추가하지 말 것**: "🤖 Generated with [Claude Code](https://claude.ai/code)" 문구
+- **절대 추가하지 말 것**: "Co-Authored-By: Claude <noreply@anthropic.com>" 문구
+- 커밋 메시지와 PR 본문은 깔끔하고 간결하게 작성
+- 작업 내용만 명확히 설명하고 불필요한 메타 정보는 포함하지 않음
+
 ### 2.4 PR 머지 정책
 - 모든 PR은 반드시 squash 머지로 진행
 - 머지 후 로컬/원격 브랜치 자동 삭제
@@ -141,3 +147,9 @@ gh pr merge [PR번호] --squash --delete-branch
 - 정기적으로 룰의 예시와 실제 코드베이스 비교
 - 더 이상 사용되지 않는 패턴이나 구조 식별
 - 새롭게 도입된 패턴이나 구조가 룰에 반영되었는지 확인
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
