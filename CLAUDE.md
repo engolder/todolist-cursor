@@ -1,5 +1,15 @@
 # Claude Code 작업 가이드
 
+## ⚠️ 중요 - Git 작업 시 필수 준수사항 ⚠️
+**모든 커밋과 PR에서 다음 문구들은 절대 사용 금지:**
+- ❌ `"🤖 Generated with [Claude Code](https://claude.ai/code)"`
+- ❌ `"Co-Authored-By: Claude <noreply@anthropic.com>"`
+- ❌ 기타 Claude 관련 메타 정보
+
+**항상 개발자가 직접 작성한 것처럼 자연스럽고 깔끔하게 작성**
+
+---
+
 ## 1. Claude Code 기본 동작 원칙
 
 ### 1.1 기본 워크플로우
@@ -70,11 +80,19 @@ gh pr create \
   --assignee "@me"
 ```
 
-#### 커밋 및 PR 작성 시 주의사항
-- **절대 추가하지 말 것**: "🤖 Generated with [Claude Code](https://claude.ai/code)" 문구
-- **절대 추가하지 말 것**: "Co-Authored-By: Claude <noreply@anthropic.com>" 문구
-- 커밋 메시지와 PR 본문은 깔끔하고 간결하게 작성
-- 작업 내용만 명확히 설명하고 불필요한 메타 정보는 포함하지 않음
+#### ⚠️ 커밋 및 PR 작성 시 필수 준수사항 ⚠️
+**다음 문구들은 절대로 추가하지 않음:**
+- ❌ `"🤖 Generated with [Claude Code](https://claude.ai/code)"` 문구
+- ❌ `"Co-Authored-By: Claude <noreply@anthropic.com>"` 문구
+- ❌ 기타 Claude 관련 메타 정보나 서명
+
+**준수해야 할 원칙:**
+- ✅ 커밋 메시지와 PR 본문은 깔끔하고 간결하게 작성
+- ✅ 작업 내용만 명확히 설명
+- ✅ 불필요한 메타 정보는 포함하지 않음
+- ✅ 개발자가 직접 작성한 것처럼 자연스럽게 작성
+
+**중요**: 이 규칙들은 모든 Git 작업 시 반드시 적용되어야 함
 
 ### 2.4 PR 머지 정책
 - 모든 PR은 반드시 squash 머지로 진행
