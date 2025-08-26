@@ -7,12 +7,13 @@
 - **언어**: TypeScript 5.0+ (strict 모드)
 - **상태 관리**: 
   - 로컬 상태: useState, useReducer
-  - 전역 상태: Zustand (가벼운 상태) 또는 Context API (복잡한 상태)
-  - 서버 상태: React Query (TanStack Query)
+  - 클라이언트 전역 상태: Zustand (UI 상태) 또는 Context API (복잡한 상태)
+  - 서버 상태: React Query (TanStack Query) - 주요 상태 관리 방식
 - **라우팅**: React Router v6
 - **스타일링**: 
   - Vanilla Extract (타입 안전한 CSS-in-JS)
   - Radix UI (접근성이 보장된 UI 컴포넌트)
+- **HTTP 클라이언트**: ky (모던 fetch wrapper)
 - **빌드 도구**: Vite (빠른 개발 환경)
 - **패키지 매니저**: Yarn (안정적이고 빠른 의존성 관리)
 
@@ -29,7 +30,7 @@
 - **코드 포맷터/린터**: Biome (빠르고 일관된 코드 스타일)
 - **타입 체크**: TypeScript strict 모드
 - **테스팅**: Vitest + React Testing Library + MSW
-- **상태 관리 도구**: Zustand DevTools
+- **상태 관리 도구**: React Query DevTools, Zustand DevTools
 
 ---
 
@@ -54,8 +55,9 @@ src/
 │   └── index.ts     # 위젯 모음
 ├── features/        # 기능 단위 모듈
 │   ├── todo-list/   # Todo 리스트 기능
+│   │   ├── hooks/   # React Query 훅 (서버 상태)
 │   │   ├── ui/      # 기능 UI 컴포넌트
-│   │   ├── model/   # 기능 상태 관리
+│   │   ├── model/   # 기능 상태 관리 (클라이언트 상태)
 │   │   ├── lib/     # 기능 로직
 │   │   └── index.ts # 기능 진입점
 │   └── index.ts     # 기능 모음
@@ -68,7 +70,7 @@ src/
 │   └── index.ts     # 엔티티 모음
 └── shared/          # 공유 리소스
     ├── ui/          # UI 키트
-    ├── api/         # API 클라이언트
+    ├── api/         # API 클라이언트 (HTTP 함수)
     ├── lib/         # 유틸리티
     ├── config/      # 설정
     └── index.ts     # 공유 리소스 진입점
@@ -86,7 +88,7 @@ ios/                # iOS 프로젝트 디렉토리
 ## 🏗️ 레이어별 책임
 
 ### 1. app/ - 앱 초기화
-- 전역 프로바이더
+- 전역 프로바이더 (QueryProvider, 기타 Context)
 - 라우팅 설정
 - 전역 스타일
 - 앱 설정
@@ -103,7 +105,8 @@ ios/                # iOS 프로젝트 디렉토리
 
 ### 4. features/ - 기능 단위 모듈
 - 비즈니스 로직
-- 상태 관리
+- 서버 상태 관리 (React Query 훅 - `hooks/` 폴더)
+- 클라이언트 상태 관리 (Zustand, Context - `model/` 폴더)
 - 특정 기능에 관련된 모든 컴포넌트와 로직
 
 ### 5. entities/ - 비즈니스 엔티티
@@ -113,7 +116,7 @@ ios/                # iOS 프로젝트 디렉토리
 
 ### 6. shared/ - 공유 리소스
 - UI 키트
-- API 클라이언트
+- API 클라이언트 (HTTP 함수, ky 기반)
 - 유틸리티 함수
 - 설정 파일
 
@@ -149,9 +152,52 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle }) => {
 ```
 
 ### 상태 관리 패턴
-- **로컬 상태**: useState, useReducer
-- **전역 상태**: Zustand (가벼운 상태)
-- **서버 상태**: React Query (TanStack Query)
+- **로컬 상태**: useState, useReducer (컴포넌트 내부 상태)
+- **클라이언트 전역 상태**: Zustand (UI 상태, 설정 등)
+- **서버 상태**: React Query (API 데이터, 캐싱, 동기화)
+
+### React Query 사용 예시
+```typescript
+// features/todo-list/hooks/useTodos.ts
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { todoApi } from '../../../shared/api';
+
+export function useTodos() {
+  return useQuery({
+    queryKey: ['todos'],
+    queryFn: todoApi.getAll,
+  });
+}
+
+export function useCreateTodo() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: todoApi.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
+    },
+  });
+}
+```
+
+### API 클라이언트 구조
+```typescript
+// shared/api/todoApi.ts
+import ky from 'ky';
+
+const api = ky.create({
+  prefixUrl: 'http://localhost:8080/api/v1',
+  headers: { 'Content-Type': 'application/json' },
+});
+
+export const todoApi = {
+  getAll: () => api.get('todos').json<ApiResponse<Todo[]>>(),
+  create: (input: CreateTodoInput) => 
+    api.post('todos', { json: input }).json<ApiResponse<Todo>>(),
+  // ...
+};
+```
 
 ### 스타일링 가이드라인
 ```typescript
@@ -174,7 +220,7 @@ export const container = style({
 # 개발 서버 시작
 yarn dev
 
-# iOS 빌드
+# iOS 빌드 (자동 라이브 리로드)
 yarn ios:dev
 
 # 타입 체크
@@ -185,6 +231,20 @@ yarn lint
 
 # 빌드
 yarn build
+```
+
+### 백엔드 연동 개발
+```bash
+# 1. 백엔드 서버 실행 (별도 터미널)
+cd ../backend
+go run cmd/todo-service/main.go
+
+# 2. 프론트엔드 개발 서버 실행
+yarn dev
+
+# API 테스트 (백엔드 서버 실행 상태에서)
+curl http://localhost:8080/health
+curl http://localhost:8080/api/v1/todos
 ```
 
 ### iOS 개발 명령어
@@ -241,22 +301,52 @@ export const container = style({
 });
 ```
 
-### 상태 관리 문제
-**문제**: Zustand 스토어 업데이트 안됨
+### React Query 문제
+**문제**: API 호출이 작동하지 않거나 캐시가 업데이트되지 않음
 **해결**:
 ```typescript
-// ✅ 올바른 사용법
+// ✅ QueryProvider 설정 확인
+// app/App.tsx
+import { QueryProvider } from './providers/QueryProvider';
+
+export const App = () => (
+  <QueryProvider>
+    <main>{/* 컴포넌트 */}</main>
+  </QueryProvider>
+);
+
+// ✅ Mutation 후 캐시 무효화
+const createMutation = useMutation({
+  mutationFn: todoApi.create,
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['todos'] });
+  },
+});
+```
+
+### CORS 에러 문제
+**문제**: 백엔드 API 호출 시 CORS 에러
+**해결**:
+1. 백엔드 서버 실행 상태 확인: `http://localhost:8080/health`
+2. 프론트엔드 포트가 백엔드 CORS 설정에 포함되어 있는지 확인
+3. API URL 확인: `shared/api/todoApi.ts`의 `prefixUrl` 설정
+
+### 상태 관리 문제
+**문제**: Zustand 스토어 업데이트 안됨 (클라이언트 상태용)
+**해결**:
+```typescript
+// ✅ 올바른 사용법 (UI 상태 관리용)
 import { create } from 'zustand';
 
-interface TodoStore {
-  todos: Todo[];
-  addTodo: (todo: Todo) => void;
+interface UIStore {
+  sidebarOpen: boolean;
+  toggleSidebar: () => void;
 }
 
-export const useTodoStore = create<TodoStore>((set) => ({
-  todos: [],
-  addTodo: (todo) => set((state) => ({ 
-    todos: [...state.todos, todo] 
+export const useUIStore = create<UIStore>((set) => ({
+  sidebarOpen: false,
+  toggleSidebar: () => set((state) => ({ 
+    sidebarOpen: !state.sidebarOpen 
   })),
 }));
 ```
@@ -316,7 +406,9 @@ describe('TodoItem', () => {
 ## 📚 참고 문서
 - [React 공식 문서](https://react.dev/)
 - [TypeScript 핸드북](https://www.typescriptlang.org/docs/)
+- [React Query 문서](https://tanstack.com/query/latest) - 서버 상태 관리
+- [ky HTTP 클라이언트](https://github.com/sindresorhus/ky) - 모던 fetch wrapper
 - [Capacitor 문서](https://capacitorjs.com/docs)
 - [Vanilla Extract 문서](https://vanilla-extract.style/)
-- [Zustand 문서](https://zustand-demo.pmnd.rs/)
-- [React Query 문서](https://tanstack.com/query/latest) 
+- [Zustand 문서](https://zustand-demo.pmnd.rs/) - 클라이언트 상태 관리
+- [Radix UI 문서](https://www.radix-ui.com/docs) - 접근성 보장 컴포넌트 
