@@ -3,7 +3,7 @@ package infrastructure
 import (
 	"log"
 	"os"
-	"todolist-backend/internal/domain"
+	"tasklist-backend/internal/domain"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -17,7 +17,7 @@ type Database struct {
 func NewDatabase() (*Database, error) {
 	dbPath := os.Getenv("DB_PATH")
 	if dbPath == "" {
-		dbPath = "./todos.db"
+		dbPath = "./data/tasks.db"
 	}
 
 	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
@@ -27,7 +27,7 @@ func NewDatabase() (*Database, error) {
 		return nil, err
 	}
 
-	if err := db.AutoMigrate(&domain.Todo{}); err != nil {
+	if err := db.AutoMigrate(&domain.Task{}); err != nil {
 		return nil, err
 	}
 

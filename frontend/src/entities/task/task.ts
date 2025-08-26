@@ -1,10 +1,10 @@
-export interface Todo {
+export interface Task {
   id: string;
   text: string;
   completed: boolean;
   createdAt: string;
 }
 
-export interface CreateTodoInput {
+export interface CreateTaskInput {
   text: string;
 } 
