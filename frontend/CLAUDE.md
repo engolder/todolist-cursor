@@ -224,10 +224,16 @@ yarn dev
 yarn ios:dev
 
 # 타입 체크
-yarn typecheck
+yarn build  # tsc -b 포함
+
+# 코드 포맷팅
+yarn format
 
 # 린트 체크
 yarn lint
+
+# 린트 체크 및 자동 수정
+yarn check
 
 # 빌드
 yarn build
