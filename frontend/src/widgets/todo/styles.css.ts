@@ -118,4 +118,11 @@ export const deleteButton = style({
   ':hover': {
     backgroundColor: '#dc2626',
   },
+})
+
+export const empty = style({
+  textAlign: 'center',
+  color: '#9ca3af',
+  fontSize: '1rem',
+  padding: '2rem',
 }) 
