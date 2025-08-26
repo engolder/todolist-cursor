@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "check": "biome check --fix .",
     "preview": "vite preview",
     "ios:build": "node scripts/ios-build.js",
     "ios:open": "npx cap open ios",
@@ -30,7 +32,6 @@
   "devDependencies": {
     "@biomejs/biome": "^2.1.2",
     "@capacitor/cli": "7.4.2",
-    "@eslint/js": "^9.30.1",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -39,13 +40,8 @@
     "@types/react-dom": "^19.1.6",
     "@vanilla-extract/vite-plugin": "^5.1.0",
     "@vitejs/plugin-react": "^4.6.0",
-    "eslint": "^9.30.1",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "globals": "^16.3.0",
     "msw": "^2.10.4",
     "typescript": "~5.8.3",
-    "typescript-eslint": "^8.35.1",
     "vite": "^7.0.4",
     "vitest": "^3.2.4"
   }
