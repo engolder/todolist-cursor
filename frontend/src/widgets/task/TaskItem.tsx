@@ -1,32 +1,32 @@
 import { type FC } from 'react'
 import * as Checkbox from '@radix-ui/react-checkbox'
-import type { Todo } from "../../entities/todo/todo";
+import type { Task } from "../../entities/task/task";
 import * as styles from './styles.css'
 
-interface TodoItemProps {
-  todo: Todo
+interface TaskItemProps {
+  task: Task
   onToggle: (id: string) => void
   onDelete: (id: string) => void
 }
 
-export const TodoItem: FC<TodoItemProps> = ({ todo, onToggle, onDelete }) => {
+export const TaskItem: FC<TaskItemProps> = ({ task, onToggle, onDelete }) => {
   return (
     <div className={styles.item}>
       <Checkbox.Root
         className={styles.checkbox}
-        checked={todo.completed}
-        onCheckedChange={() => onToggle(todo.id)}
+        checked={task.completed}
+        onCheckedChange={() => onToggle(task.id)}
       >
         <Checkbox.Indicator>
-          {todo.completed && '✓'}
+          {task.completed && '✓'}
         </Checkbox.Indicator>
       </Checkbox.Root>
-      <span className={todo.completed ? styles.completedText : styles.text}>
-        {todo.text}
+      <span className={task.completed ? styles.completedText : styles.text}>
+        {task.text}
       </span>
       <button
         className={styles.deleteButton}
-        onClick={() => onDelete(todo.id)}
+        onClick={() => onDelete(task.id)}
         type="button"
       >
         삭제

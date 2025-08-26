@@ -23,18 +23,18 @@
 ```
 backend/
 ├── cmd/
-│   └── todo-service/        # 서비스 진입점
+│   └── task-service/        # 서비스 진입점
 │       └── main.go          # 메인 실행 파일
 ├── internal/                # 비공개 패키지 (외부 import 불가)
 │   ├── domain/              # 도메인 레이어 (비즈니스 모델)
-│   │   └── todo.go          # Todo 엔티티, Repository 인터페이스
+│   │   └── task.go          # Task 엔티티, Repository 인터페이스
 │   ├── application/         # 애플리케이션 레이어 (비즈니스 로직)
-│   │   └── todo_service.go  # Todo 비즈니스 서비스
+│   │   └── task_service.go  # Task 비즈니스 서비스
 │   ├── infrastructure/      # 인프라 레이어 (외부 의존성)
 │   │   ├── database.go      # 데이터베이스 연결 설정
-│   │   └── todo_repository.go # Repository 구현체
+│   │   └── task_repository.go # Repository 구현체
 │   └── interfaces/          # 인터페이스 레이어 (HTTP API)
-│       ├── todo_handler.go  # HTTP 핸들러
+│       ├── task_handler.go  # HTTP 핸들러
 │       └── router.go        # API 라우터 설정
 ├── pkg/                     # 공개 패키지 (외부 import 가능)
 │   ├── config/             # 설정 관리
@@ -44,7 +44,7 @@ backend/
 ├── configs/                # 설정 파일 디렉토리
 ├── go.mod                  # Go 모듈 정의
 ├── go.sum                  # 의존성 체크섬
-└── todos.db               # SQLite 데이터베이스 파일
+└── tasks.db               # SQLite 데이터베이스 파일
 ```
 
 ---
@@ -55,26 +55,26 @@ backend/
 - **책임**: 순수한 비즈니스 모델과 규칙 정의
 - **특징**: 외부 의존성 없음, 프레임워크 독립적
 - **파일**:
-  - `todo.go`: Todo 엔티티, 비즈니스 규칙, Repository 인터페이스
+  - `task.go`: Task 엔티티, 비즈니스 규칙, Repository 인터페이스
 
 ### 2. Application Layer (`internal/application/`)
 - **책임**: 비즈니스 로직 조율, 사용 사례 구현
 - **특징**: Domain을 의존하지만 Infrastructure는 인터페이스로 추상화
 - **파일**:
-  - `todo_service.go`: Todo 관련 비즈니스 로직, 입력 검증
+  - `task_service.go`: Task 관련 비즈니스 로직, 입력 검증
 
 ### 3. Infrastructure Layer (`internal/infrastructure/`)
 - **책임**: 외부 시스템과의 연동 (DB, 외부 API 등)
 - **특징**: Domain 인터페이스 구현, 프레임워크 의존적
 - **파일**:
   - `database.go`: GORM 데이터베이스 연결 관리
-  - `todo_repository.go`: TodoRepository 인터페이스 구현
+  - `task_repository.go`: TaskRepository 인터페이스 구현
 
 ### 4. Interface Layer (`internal/interfaces/`)
 - **책임**: 외부와의 통신 인터페이스 (HTTP, CLI 등)
 - **특징**: 프레임워크 의존적, Application Layer 사용
 - **파일**:
-  - `todo_handler.go`: HTTP 요청/응답 처리
+  - `task_handler.go`: HTTP 요청/응답 처리
   - `router.go`: API 엔드포인트 라우팅, 미들웨어 설정
 
 ---
@@ -85,12 +85,12 @@ backend/
 - `GET /health` - 서비스 상태 확인
 - `GET /ready` - 서비스 준비 상태 확인 (마이크로서비스용)
 
-### Todo API (v1)
-- `GET /api/v1/todos` - 전체 할일 목록 조회
-- `GET /api/v1/todos/:id` - 특정 할일 조회
-- `POST /api/v1/todos` - 새 할일 생성
-- `PUT /api/v1/todos/:id` - 할일 업데이트 (완료 상태, 텍스트 수정)
-- `DELETE /api/v1/todos/:id` - 할일 삭제
+### Task API (v1)
+- `GET /api/v1/tasks` - 전체 할일 목록 조회
+- `GET /api/v1/tasks/:id` - 특정 할일 조회
+- `POST /api/v1/tasks` - 새 할일 생성
+- `PUT /api/v1/tasks/:id` - 할일 업데이트 (완료 상태, 텍스트 수정)
+- `DELETE /api/v1/tasks/:id` - 할일 삭제
 
 ### API 응답 형식
 ```json
@@ -116,9 +116,9 @@ backend/
 
 ## 🗄️ 데이터 모델
 
-### Todo 엔티티
+### Task 엔티티
 ```go
-type Todo struct {
+type Task struct {
     ID        string    `json:"id" gorm:"primaryKey;type:varchar(36)"`
     Text      string    `json:"text" gorm:"not null"`
     Completed bool      `json:"completed" gorm:"default:false"`
@@ -129,11 +129,11 @@ type Todo struct {
 
 ### Repository 인터페이스
 ```go
-type TodoRepository interface {
-    GetAll() ([]Todo, error)
-    GetByID(id string) (*Todo, error)
-    Create(input CreateTodoInput) (*Todo, error)
-    Update(id string, input UpdateTodoInput) (*Todo, error)
+type TaskRepository interface {
+    GetAll() ([]Task, error)
+    GetByID(id string) (*Task, error)
+    Create(input CreateTaskInput) (*Task, error)
+    Update(id string, input UpdateTaskInput) (*Task, error)
     Delete(id string) error
 }
 ```
@@ -144,7 +144,7 @@ type TodoRepository interface {
 
 ### 환경 변수
 - `PORT`: 서버 포트 (기본값: 8080)
-- `DB_PATH`: SQLite 데이터베이스 파일 경로 (기본값: ./todos.db)
+- `DB_PATH`: SQLite 데이터베이스 파일 경로 (기본값: ./tasks.db)
 
 ### 설정 로딩
 ```go
@@ -161,11 +161,11 @@ cfg := config.Load()  // 환경변수에서 설정 로드
 go mod tidy
 
 # 개발 서버 실행
-go run cmd/todo-service/main.go
+go run cmd/task-service/main.go
 
 # 또는 빌드 후 실행
-go build -o bin/todo-service cmd/todo-service/main.go
-./bin/todo-service
+go build -o bin/task-service cmd/task-service/main.go
+./bin/task-service
 ```
 
 ### API 테스트
@@ -173,16 +173,16 @@ go build -o bin/todo-service cmd/todo-service/main.go
 # Health Check
 curl http://localhost:8080/health
 
-# Todo 목록 조회
-curl http://localhost:8080/api/v1/todos
+# Task 목록 조회
+curl http://localhost:8080/api/v1/tasks
 
-# Todo 생성
-curl -X POST http://localhost:8080/api/v1/todos \
+# Task 생성
+curl -X POST http://localhost:8080/api/v1/tasks \
   -H "Content-Type: application/json" \
   -d '{"text": "새로운 할일"}'
 
-# Todo 완료 처리
-curl -X PUT http://localhost:8080/api/v1/todos/{id} \
+# Task 완료 처리
+curl -X PUT http://localhost:8080/api/v1/tasks/{id} \
   -H "Content-Type: application/json" \
   -d '{"completed": true}'
 ```
@@ -253,19 +253,19 @@ curl -X PUT http://localhost:8080/api/v1/todos/{id} \
 ## 📚 코딩 가이드라인
 
 ### 네이밍 규칙
-- **패키지명**: 소문자, 단수형 (예: `todo`, `config`)
-- **구조체**: PascalCase (예: `TodoService`, `CreateTodoInput`)
+- **패키지명**: 소문자, 단수형 (예: `task`, `config`)
+- **구조체**: PascalCase (예: `TaskService`, `CreateTaskInput`)
 - **함수/메서드**: PascalCase (공개), camelCase (비공개)
 - **상수**: UPPER_SNAKE_CASE 또는 PascalCase
 
 ### 에러 처리
-- 사용자 정의 에러 변수 활용: `ErrTodoNotFound`
+- 사용자 정의 에러 변수 활용: `ErrTaskNotFound`
 - `errors.Is()` 사용으로 에러 체크
 - HTTP 핸들러에서는 적절한 상태 코드 반환
 
 ### 의존성 주입
 - 인터페이스 기반 의존성 주입
-- 생성자 함수 패턴: `NewTodoService(repo TodoRepository)`
+- 생성자 함수 패턴: `NewTaskService(repo TaskRepository)`
 - Mock 테스트 가능한 구조
 
 ---

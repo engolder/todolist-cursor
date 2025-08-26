@@ -2,43 +2,43 @@ package application
 
 import (
 	"errors"
-	"todolist-backend/internal/domain"
+	"tasklist-backend/internal/domain"
 )
 
 var (
-	ErrTodoNotFound = errors.New("todo not found")
+	ErrTaskNotFound = errors.New("task not found")
 	ErrInvalidInput = errors.New("invalid input")
 )
 
-type TodoService struct {
-	repo domain.TodoRepository
+type TaskService struct {
+	repo domain.TaskRepository
 }
 
-func NewTodoService(repo domain.TodoRepository) *TodoService {
-	return &TodoService{
+func NewTaskService(repo domain.TaskRepository) *TaskService {
+	return &TaskService{
 		repo: repo,
 	}
 }
 
-func (s *TodoService) GetAllTodos() ([]domain.Todo, error) {
+func (s *TaskService) GetAllTasks() ([]domain.Task, error) {
 	return s.repo.GetAll()
 }
 
-func (s *TodoService) GetTodoByID(id string) (*domain.Todo, error) {
+func (s *TaskService) GetTaskByID(id string) (*domain.Task, error) {
 	if id == "" {
 		return nil, ErrInvalidInput
 	}
 	return s.repo.GetByID(id)
 }
 
-func (s *TodoService) CreateTodo(input domain.CreateTodoInput) (*domain.Todo, error) {
+func (s *TaskService) CreateTask(input domain.CreateTaskInput) (*domain.Task, error) {
 	if input.Text == "" {
 		return nil, ErrInvalidInput
 	}
 	return s.repo.Create(input)
 }
 
-func (s *TodoService) UpdateTodo(id string, input domain.UpdateTodoInput) (*domain.Todo, error) {
+func (s *TaskService) UpdateTask(id string, input domain.UpdateTaskInput) (*domain.Task, error) {
 	if id == "" {
 		return nil, ErrInvalidInput
 	}
@@ -48,13 +48,13 @@ func (s *TodoService) UpdateTodo(id string, input domain.UpdateTodoInput) (*doma
 		return nil, err
 	}
 	if existing == nil {
-		return nil, ErrTodoNotFound
+		return nil, ErrTaskNotFound
 	}
 	
 	return s.repo.Update(id, input)
 }
 
-func (s *TodoService) DeleteTodo(id string) error {
+func (s *TaskService) DeleteTask(id string) error {
 	if id == "" {
 		return ErrInvalidInput
 	}
@@ -64,7 +64,7 @@ func (s *TodoService) DeleteTodo(id string) error {
 		return err
 	}
 	if existing == nil {
-		return ErrTodoNotFound
+		return ErrTaskNotFound
 	}
 	
 	return s.repo.Delete(id)

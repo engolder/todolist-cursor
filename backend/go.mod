@@ -1,4 +1,4 @@
-module todolist-backend
+module tasklist-backend
 
 go 1.23.0
 

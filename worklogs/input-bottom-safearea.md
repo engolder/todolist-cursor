@@ -15,8 +15,8 @@
 
 #### 컴포넌트 구조 파악
 **관련 파일들**
-- 입력창 컴포넌트: `frontend/src/widgets/todo/TodoList.tsx`
-- 스타일 정의: `frontend/src/widgets/todo/styles.css.ts`
+- 입력창 컴포넌트: `frontend/src/widgets/task/TaskList.tsx`
+- 스타일 정의: `frontend/src/widgets/task/styles.css.ts`
 - 앱 엔트리: `frontend/src/app/App.tsx`
 
 #### CSS 스타일 수정

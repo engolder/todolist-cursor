@@ -47,20 +47,20 @@ src/
 │   │   └── index.ts # 페이지 진입점
 │   └── index.ts     # 페이지 모음
 ├── widgets/         # 독립적인 큰 블록
-│   ├── todo/        # Todo 위젯
+│   ├── task/        # Task 위젯
 │   │   ├── ui/      # 위젯 UI 컴포넌트
 │   │   ├── lib/     # 위젯 로직
 │   │   └── index.ts # 위젯 진입점
 │   └── index.ts     # 위젯 모음
 ├── features/        # 기능 단위 모듈
-│   ├── todo-list/   # Todo 리스트 기능
+│   ├── task-list/   # Task 리스트 기능
 │   │   ├── ui/      # 기능 UI 컴포넌트
 │   │   ├── model/   # 기능 상태 관리
 │   │   ├── lib/     # 기능 로직
 │   │   └── index.ts # 기능 진입점
 │   └── index.ts     # 기능 모음
 ├── entities/        # 비즈니스 엔티티
-│   ├── todo/        # Todo 엔티티
+│   ├── task/        # Task 엔티티
 │   │   ├── ui/      # 엔티티 UI 컴포넌트
 │   │   ├── model/   # 엔티티 모델
 │   │   ├── lib/     # 엔티티 로직
@@ -129,20 +129,20 @@ ios/                # iOS 프로젝트 디렉토리
 ### 컴포넌트 작성 가이드라인
 ```typescript
 // ✅ 좋은 예시
-interface TodoItemProps {
-  todo: Todo;
+interface TaskItemProps {
+  task: Task;
   onToggle: (id: string) => void;
 }
 
-export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle }) => {
+export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle }) => {
   return (
     <div className={styles.container}>
       <input
         type="checkbox"
-        checked={todo.completed}
-        onChange={() => onToggle(todo.id)}
+        checked={task.completed}
+        onChange={() => onToggle(task.id)}
       />
-      <span className={styles.text}>{todo.text}</span>
+      <span className={styles.text}>{task.text}</span>
     </div>
   );
 };
@@ -248,15 +248,15 @@ export const container = style({
 // ✅ 올바른 사용법
 import { create } from 'zustand';
 
-interface TodoStore {
-  todos: Todo[];
-  addTodo: (todo: Todo) => void;
+interface TaskStore {
+  tasks: Task[];
+  addTask: (task: Task) => void;
 }
 
-export const useTodoStore = create<TodoStore>((set) => ({
-  todos: [],
-  addTodo: (todo) => set((state) => ({ 
-    todos: [...state.todos, todo] 
+export const useTaskStore = create<TaskStore>((set) => ({
+  tasks: [],
+  addTask: (task) => set((state) => ({ 
+    tasks: [...state.tasks, task] 
   })),
 }));
 ```
@@ -294,14 +294,14 @@ export const useTodoStore = create<TodoStore>((set) => ({
 ### 테스트 작성 예시
 ```typescript
 import { render, screen, fireEvent } from '@testing-library/react';
-import { TodoItem } from './TodoItem';
+import { TaskItem } from './TaskItem';
 
-describe('TodoItem', () => {
-  it('should toggle todo when checkbox is clicked', () => {
+describe('TaskItem', () => {
+  it('should toggle task when checkbox is clicked', () => {
     const mockToggle = jest.fn();
-    const todo = { id: '1', text: 'Test todo', completed: false };
+    const task = { id: '1', text: 'Test task', completed: false };
     
-    render(<TodoItem todo={todo} onToggle={mockToggle} />);
+    render(<TaskItem task={task} onToggle={mockToggle} />);
     
     const checkbox = screen.getByRole('checkbox');
     fireEvent.click(checkbox);

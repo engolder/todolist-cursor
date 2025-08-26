@@ -17,7 +17,7 @@ func Load() *Config {
 
 	dbPath := os.Getenv("DB_PATH")
 	if dbPath == "" {
-		dbPath = "./data/todos.db"
+		dbPath = "./data/tasks.db"
 	}
 
 	return &Config{

@@ -42,14 +42,14 @@ yarn add -D @capacitor/cli@7.4.2
 
 **프로젝트 초기화**
 ```bash
-npx cap init TodoList io.cursor.todolist --web-dir dist
+npx cap init TaskList io.cursor.tasklist --web-dir dist
 ```
 
 **capacitor.config.ts 설정**
 ```typescript
 const config: CapacitorConfig = {
-  appId: 'io.cursor.todolist',
-  appName: 'Todo List',
+  appId: 'io.cursor.tasklist',
+  appName: 'Task List',
   webDir: 'dist',
   server: {
     androidScheme: 'https'
@@ -85,7 +85,7 @@ rm -rf ios && npx cap add ios
 ### 3. 검증 및 테스트
 - Xcode 시뮬레이터에서 앱 실행 성공
 - 웹앱 기능이 iOS 환경에서 정상 동작 확인
-- 앱 이름이 "Todo List"로 정상 표시
+- 앱 이름이 "Task List"로 정상 표시
 
 ## 발생한 문제 및 해결
 

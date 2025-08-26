@@ -48,13 +48,13 @@ src/
 │   │   └── index.ts # 페이지 진입점
 │   └── index.ts     # 페이지 모음
 ├── widgets/         # 독립적인 큰 블록
-│   ├── todo/        # Todo 위젯
+│   ├── task/        # Task 위젯
 │   │   ├── ui/      # 위젯 UI 컴포넌트
 │   │   ├── lib/     # 위젯 로직
 │   │   └── index.ts # 위젯 진입점
 │   └── index.ts     # 위젯 모음
 ├── features/        # 기능 단위 모듈
-│   ├── todo-list/   # Todo 리스트 기능
+│   ├── task-list/   # Task 리스트 기능
 │   │   ├── hooks/   # React Query 훅 (서버 상태)
 │   │   ├── ui/      # 기능 UI 컴포넌트
 │   │   ├── model/   # 기능 상태 관리 (클라이언트 상태)
@@ -62,7 +62,7 @@ src/
 │   │   └── index.ts # 기능 진입점
 │   └── index.ts     # 기능 모음
 ├── entities/        # 비즈니스 엔티티
-│   ├── todo/        # Todo 엔티티
+│   ├── task/        # Task 엔티티
 │   │   ├── ui/      # 엔티티 UI 컴포넌트
 │   │   ├── model/   # 엔티티 모델
 │   │   ├── lib/     # 엔티티 로직
@@ -132,20 +132,20 @@ ios/                # iOS 프로젝트 디렉토리
 ### 컴포넌트 작성 가이드라인
 ```typescript
 // ✅ 좋은 예시
-interface TodoItemProps {
-  todo: Todo;
+interface TaskItemProps {
+  task: Task;
   onToggle: (id: string) => void;
 }
 
-export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle }) => {
+export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle }) => {
   return (
     <div className={styles.container}>
       <input
         type="checkbox"
-        checked={todo.completed}
-        onChange={() => onToggle(todo.id)}
+        checked={task.completed}
+        onChange={() => onToggle(task.id)}
       />
-      <span className={styles.text}>{todo.text}</span>
+      <span className={styles.text}>{task.text}</span>
     </div>
   );
 };
@@ -158,24 +158,24 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle }) => {
 
 ### React Query 사용 예시
 ```typescript
-// features/todo-list/hooks/useTodos.ts
+// features/task-list/hooks/useTasks.ts
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { todoApi } from '../../../shared/api';
+import { taskApi } from '../../../shared/api';
 
-export function useTodos() {
+export function useTasks() {
   return useQuery({
-    queryKey: ['todos'],
-    queryFn: todoApi.getAll,
+    queryKey: ['tasks'],
+    queryFn: taskApi.getAll,
   });
 }
 
-export function useCreateTodo() {
+export function useCreateTask() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: todoApi.create,
+    mutationFn: taskApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['todos'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
   });
 }
@@ -183,7 +183,7 @@ export function useCreateTodo() {
 
 ### API 클라이언트 구조
 ```typescript
-// shared/api/todoApi.ts
+// shared/api/taskApi.ts
 import ky from 'ky';
 
 const api = ky.create({
@@ -191,10 +191,10 @@ const api = ky.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-export const todoApi = {
-  getAll: () => api.get('todos').json<ApiResponse<Todo[]>>(),
-  create: (input: CreateTodoInput) => 
-    api.post('todos', { json: input }).json<ApiResponse<Todo>>(),
+export const taskApi = {
+  getAll: () => api.get('tasks').json<ApiResponse<Task[]>>(),
+  create: (input: CreateTaskInput) => 
+    api.post('tasks', { json: input }).json<ApiResponse<Task>>(),
   // ...
 };
 ```
@@ -237,14 +237,14 @@ yarn build
 ```bash
 # 1. 백엔드 서버 실행 (별도 터미널)
 cd ../backend
-go run cmd/todo-service/main.go
+go run cmd/task-service/main.go
 
 # 2. 프론트엔드 개발 서버 실행
 yarn dev
 
 # API 테스트 (백엔드 서버 실행 상태에서)
 curl http://localhost:8080/health
-curl http://localhost:8080/api/v1/todos
+curl http://localhost:8080/api/v1/tasks
 ```
 
 ### iOS 개발 명령어
@@ -317,9 +317,9 @@ export const App = () => (
 
 // ✅ Mutation 후 캐시 무효화
 const createMutation = useMutation({
-  mutationFn: todoApi.create,
+  mutationFn: taskApi.create,
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['todos'] });
+    queryClient.invalidateQueries({ queryKey: ['tasks'] });
   },
 });
 ```
@@ -329,7 +329,7 @@ const createMutation = useMutation({
 **해결**:
 1. 백엔드 서버 실행 상태 확인: `http://localhost:8080/health`
 2. 프론트엔드 포트가 백엔드 CORS 설정에 포함되어 있는지 확인
-3. API URL 확인: `shared/api/todoApi.ts`의 `prefixUrl` 설정
+3. API URL 확인: `shared/api/taskApi.ts`의 `prefixUrl` 설정
 
 ### 상태 관리 문제
 **문제**: Zustand 스토어 업데이트 안됨 (클라이언트 상태용)
@@ -384,14 +384,14 @@ export const useUIStore = create<UIStore>((set) => ({
 ### 테스트 작성 예시
 ```typescript
 import { render, screen, fireEvent } from '@testing-library/react';
-import { TodoItem } from './TodoItem';
+import { TaskItem } from './TaskItem';
 
-describe('TodoItem', () => {
-  it('should toggle todo when checkbox is clicked', () => {
+describe('TaskItem', () => {
+  it('should toggle task when checkbox is clicked', () => {
     const mockToggle = jest.fn();
-    const todo = { id: '1', text: 'Test todo', completed: false };
+    const task = { id: '1', text: 'Test task', completed: false };
     
-    render(<TodoItem todo={todo} onToggle={mockToggle} />);
+    render(<TaskItem task={task} onToggle={mockToggle} />);
     
     const checkbox = screen.getByRole('checkbox');
     fireEvent.click(checkbox);

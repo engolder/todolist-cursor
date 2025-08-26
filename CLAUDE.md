@@ -15,11 +15,11 @@
 ### 1.1 기본 워크플로우
 - Claude Code의 기본적인 작업 방식을 유지
 - 사용자 요청을 직접적이고 효율적으로 처리
-- TodoWrite 도구를 활용한 체계적 작업 관리
+- TaskWrite 도구를 활용한 체계적 작업 관리
 
 ### 1.2 작업 진행 방식
 - 사용자 요청 즉시 분석 및 작업 시작
-- 복잡한 작업의 경우 TodoWrite로 단계별 계획 수립
+- 복잡한 작업의 경우 TaskWrite로 단계별 계획 수립
 - 각 단계 완료 시 진행 상황 업데이트
 
 ### 1.3 워크로그 참조 및 활용
@@ -33,7 +33,7 @@
 
 ### 2.1 브랜치 전략
 - 작업 내용을 1~4개의 영어 단어로 요약하여 브랜치명 결정
-  - 예: `add-todo-feature`
+  - 예: `add-task-feature`
   - 예: `fix-auth-bug`
   - 예: `update-ui-components`
   - 예: `refactor-api-client`
@@ -60,9 +60,9 @@ git branch --show-current
 - 형식: "[작업 유형] 구체적인 작업 내용 설명"
 - 작업의 의도와 영향을 명확하게 표현
 - 예시:
-  - ✅ "[Feature] Add drag-and-drop reordering to todo list"
+  - ✅ "[Feature] Add drag-and-drop reordering to task list"
   - ✅ "[Fix] Prevent token expiration during active user session"
-  - ❌ "[Feature] Update todo feature"
+  - ❌ "[Feature] Update task feature"
   - ❌ "[Fix] Fix auth bug"
 
 #### PR 본문 구조

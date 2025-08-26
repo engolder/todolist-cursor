@@ -1,13 +1,13 @@
 package interfaces
 
 import (
-	"todolist-backend/internal/application"
+	"tasklist-backend/internal/application"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(todoService *application.TodoService) *gin.Engine {
+func NewRouter(taskService *application.TaskService) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
@@ -17,25 +17,25 @@ func NewRouter(todoService *application.TodoService) *gin.Engine {
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
 	r.Use(cors.New(config))
 
-	todoHandler := NewTodoHandler(todoService)
+	taskHandler := NewTaskHandler(taskService)
 
 	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "ok", "service": "todo-service"})
+		c.JSON(200, gin.H{"status": "ok", "service": "task-service"})
 	})
 	
 	r.GET("/ready", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "ready", "service": "todo-service"})
+		c.JSON(200, gin.H{"status": "ready", "service": "task-service"})
 	})
 
 	v1 := r.Group("/api/v1")
 	{
-		todos := v1.Group("/todos")
+		tasks := v1.Group("/tasks")
 		{
-			todos.GET("", todoHandler.GetTodos)
-			todos.GET("/:id", todoHandler.GetTodo)
-			todos.POST("", todoHandler.CreateTodo)
-			todos.PUT("/:id", todoHandler.UpdateTodo)
-			todos.DELETE("/:id", todoHandler.DeleteTodo)
+			tasks.GET("", taskHandler.GetTasks)
+			tasks.GET("/:id", taskHandler.GetTask)
+			tasks.POST("", taskHandler.CreateTask)
+			tasks.PUT("/:id", taskHandler.UpdateTask)
+			tasks.DELETE("/:id", taskHandler.DeleteTask)
 		}
 	}
 
