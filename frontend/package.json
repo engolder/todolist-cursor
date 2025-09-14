@@ -10,6 +10,15 @@
     "format": "biome format --write .",
     "check": "biome check --fix .",
     "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:ci": "playwright test --config=playwright.config.ci.ts",
+    "test:e2e:chromium": "playwright test --project=chromium",
+    "test:e2e:firefox": "playwright test --project=firefox",
+    "test:e2e:webkit": "playwright test --project=webkit",
     "ios:build": "node scripts/ios-build.js",
     "ios:open": "npx cap open ios",
     "ios:dev": "node scripts/setup-live-reload.js"
@@ -32,6 +41,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.1.2",
     "@capacitor/cli": "7.4.2",
+    "@playwright/test": "^1.55.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
